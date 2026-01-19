@@ -198,15 +198,19 @@ JOIN service s ON s.service_id = sa.service_id
 JOIN asset a ON a.asset_id = sa.asset_id
 WHERE s.company_id <> a.company_id;
 
--- Q29: (consistenza) Service_provider: servizio e provider devono appartenere alla stessa company
--- (se nel tuo schema provider ha company_id; se non ce l'ha, commenta questa query)
--- Se provider.company_id esiste:
-SELECT sp.service_id, s.company_id AS service_company,
-       sp.provider_id, p.company_id AS provider_company
-FROM service_provider sp
-JOIN service s ON s.service_id = sp.service_id
-JOIN provider p ON p.provider_id = sp.provider_id
-WHERE s.company_id <> p.company_id;
+-- Q29: Provider effettivamente usati (collegati ad almeno un servizio)
+SELECT p.provider_id, p.name, COUNT(DISTINCT sp.service_id) AS linked_services
+FROM provider p
+JOIN service_provider sp ON sp.provider_id = p.provider_id
+GROUP BY p.provider_id, p.name
+ORDER BY linked_services DESC, p.name;
+
+-- Q29b: Provider non collegati ad alcun servizio (dato potenzialmente incompleto)
+SELECT p.provider_id, p.name
+FROM provider p
+LEFT JOIN service_provider sp ON sp.provider_id = p.provider_id
+WHERE sp.provider_id IS NULL
+ORDER BY p.name;
 
 
 -- ---------------------------------------------------------
