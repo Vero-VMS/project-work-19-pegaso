@@ -15,9 +15,8 @@ Obiettivo: progettare e realizzare una base dati relazionale per catalogare asse
 
 ## Requisiti (opzionali)
 - PostgreSQL (consigliato) + client `psql`  
-  Nota: ai fini del PW è sufficiente anche la consegna degli script.
 
-## Esecuzione (se vuoi testare davvero)
+## Esecuzione
 1. Crea un database vuoto (es. `pw19_nis2`).
 2. Esegui in ordine gli script:
    - `01_create_tables.sql`
@@ -31,3 +30,4 @@ psql -d pw19_nis2 -f sql/01_create_tables.sql
 psql -d pw19_nis2 -f sql/02_triggers_versioning.sql
 psql -d pw19_nis2 -f sql/03_insert_test_data.sql
 psql -d pw19_nis2 -f sql/04_views_and_exports.sql
+
