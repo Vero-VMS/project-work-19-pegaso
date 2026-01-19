@@ -26,7 +26,7 @@ Il repository è organizzato nei seguenti file:
   Creazione delle tabelle principali (company, contact, asset, service, provider) e delle tabelle associative, con definizione di chiavi primarie, chiavi esterne e vincoli di integrità.
 
 - `02_triggers_versioning.sql`  
-  Definizione dei trigger e delle funzioni per il versioning automatico degli asset e la gestione dello storico nella tabella `asset_history`.
+  Definizione dei trigger e delle funzioni per la storicizzazione automatica degli asset e la gestione dello storico nella tabella `asset_history`.
 
 - `03_insert_test_data.sql`  
   Popolamento del database con dati di test per la validazione dello schema e dei vincoli di integrità.
@@ -39,6 +39,10 @@ Il repository è organizzato nei seguenti file:
 
 - `docs/data_dictionary.md`  
   Dizionario dei dati contenente la descrizione dettagliata di tutte le tabelle, degli attributi, delle chiavi e dei vincoli del modello relazionale.
+
+- `docs/pw19_diagram_er.png`  
+  Diagramma Entità-Relazione del database.
+
 
 ---
 
@@ -73,5 +77,6 @@ Il progetto si colloca nel contesto della direttiva europea NIS2 e delle indicaz
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
