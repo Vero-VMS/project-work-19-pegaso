@@ -229,8 +229,11 @@ LEFT JOIN contact c ON c.contact_id = s.service_owner_contact_id
 WHERE s.criticality >= 4
 ORDER BY s.criticality DESC, s.service_code;
 
--- Q32: Dipendenze di un servizio: asset usati (con ruolo)
--- (filtra per service_code a scelta)
+-- G) QUERY “UTILI” PER DIMOSTRARE CHE IL MODELLO FUNZIONA
+-- (adattate ai codici di test reali)
+-- ---------------------------------------------------------
+
+-- Q32: Dipendenze di un servizio (asset usati) - esempio su SVC-PORT
 SELECT s.service_code, s.name AS service_name,
        a.asset_code, a.name AS asset_name,
        sa.usage_role, sa.is_critical_dependency
@@ -240,8 +243,7 @@ JOIN asset a ON a.asset_id = sa.asset_id
 WHERE s.service_code = 'SVC-PORT'
 ORDER BY a.asset_code;
 
--- Q33: Dipendenze di un servizio: fornitori coinvolti
--- (filtra per service_code a scelta)
+-- Q33: Dipendenze di un servizio (fornitori coinvolti) - esempio su SVC-PORT
 SELECT s.service_code, s.name AS service_name,
        p.name AS provider_name,
        sp.dependency_type, sp.contract_id, sp.sla_notes
@@ -251,8 +253,7 @@ JOIN provider p ON p.provider_id = sp.provider_id
 WHERE s.service_code = 'SVC-PORT'
 ORDER BY p.name, sp.dependency_type;
 
--- Q34: Impatto di un asset: quali servizi dipendono da un asset specifico
--- (filtra per asset_code a scelta)
+-- Q34: Impatto di un asset: quali servizi dipendono da DB-001 (asset critico tipico)
 SELECT a.asset_code, a.name AS asset_name,
        s.service_code, s.name AS service_name,
        sa.usage_role, sa.is_critical_dependency
@@ -262,8 +263,7 @@ JOIN service s ON s.service_id = sa.service_id
 WHERE a.asset_code = 'DB-001'
 ORDER BY s.service_code;
 
--- Q35: Impatto di un provider: quali servizi dipendono da un provider specifico
--- (filtra per provider name a scelta)
+-- Q35: Impatto di un provider: quali servizi dipendono da CloudOne
 SELECT p.name AS provider_name,
        s.service_code, s.name AS service_name,
        sp.dependency_type, sp.contract_id
