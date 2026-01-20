@@ -66,6 +66,34 @@ Il file `05_queries_validation.sql` contiene un insieme di query di validazione 
 
 ---
 
+## Export CSV per profilo ACN
+
+Le viste definite nel file `04_views_and_exports.sql` consentono di produrre output strutturati esportabili in formato CSV, utili alla compilazione dei profili richiesti dall’Agenzia per la Cybersicurezza Nazionale (ACN).
+
+In ambiente PostgreSQL è possibile esportare i risultati delle viste tramite il comando `\copy`, eseguito da client come psql o pgAdmin.
+
+Esempio di esportazione del profilo minimo:
+
+\copy (SELECT * FROM v_acn_profile_min) TO 'acn_profile_min.csv' CSV HEADER;
+
+In modo analogo è possibile esportare:
+
+Asset critici:
+\copy (SELECT * FROM v_acn_critical_assets) TO 'acn_critical_assets.csv' CSV HEADER;
+
+Servizi critici:
+\copy (SELECT * FROM v_acn_critical_services) TO 'acn_critical_services.csv' CSV HEADER;
+
+Dipendenze tecniche servizio–asset:
+\copy (SELECT * FROM v_acn_service_asset_dependencies) TO 'acn_service_asset_dependencies.csv' CSV HEADER;
+
+Dipendenze da fornitori terzi:
+\copy (SELECT * FROM v_acn_service_provider_dependencies) TO 'acn_service_provider_dependencies.csv' CSV HEADER;
+
+I file CSV generati costituiscono un esempio di output strutturato direttamente utilizzabile come base per la compilazione dei profili ACN.
+
+---
+
 ## Contesto normativo
 
 Il progetto si colloca nel contesto della direttiva europea NIS2 e delle indicazioni dell’Agenzia per la Cybersicurezza Nazionale (ACN) per la gestione degli asset, dei servizi critici e delle dipendenze da fornitori terzi.
@@ -77,6 +105,7 @@ Il progetto si colloca nel contesto della direttiva europea NIS2 e delle indicaz
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
