@@ -1,7 +1,7 @@
 -- =========================================================
 -- PW19 - Versioning/Storico Asset
 -- File: 02_triggers_versioning.sql
--- Scopo: mantenere storico asset ad ogni UPDATE (e chiudere versioni)
+-- Scopo: mantenere storico asset ad ogni UPDATE
 -- =========================================================
 
 -- Funzione: aggiorna updated_at e salva la versione precedente in asset_history
@@ -55,3 +55,4 @@ CREATE TRIGGER trg_service_touch
 BEFORE UPDATE ON service
 FOR EACH ROW
 EXECUTE FUNCTION fn_touch_updated_at();
+
