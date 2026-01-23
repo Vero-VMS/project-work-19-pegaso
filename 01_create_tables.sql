@@ -4,11 +4,7 @@
 -- Scopo: creare schema relazionale, vincoli e indici
 -- =========================================================
 
--- (Opzionale) schema dedicato
--- CREATE SCHEMA IF NOT EXISTS nis2;
--- SET search_path TO nis2;
-
--- Pulizia (utile se devi rieseguire)
+-- Pulizia (necessaria in caso venga rieseguito)
 DROP TABLE IF EXISTS service_provider CASCADE;
 DROP TABLE IF EXISTS service_asset CASCADE;
 DROP TABLE IF EXISTS asset_history CASCADE;
@@ -164,3 +160,4 @@ CREATE TABLE asset_history (
 
 CREATE INDEX idx_asset_history_asset ON asset_history(asset_id);
 CREATE INDEX idx_asset_history_company ON asset_history(company_id);
+
