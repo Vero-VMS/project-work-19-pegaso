@@ -2,14 +2,14 @@
 -- 05_queries_validation.sql
 -- Query di validazione e verifica del modello dati (PW19)
 -- =========================================================
--- Obiettivo:
--- - Verificare consistenza dei dati
--- - Controllare duplicati e vincoli logici
--- - Validare relazioni (1-N e N-M)
--- - Verificare storico asset (asset_history)
+-- Scopo: eseguire controlli rapidi per verificare:
+--   - popolamento e consistenza dei dati di test
+--   - assenza di duplicati e incoerenze logiche
+--   - correttezza delle relazioni (1-N e N-M)
+--   - corretto funzionamento della storicizzazione (asset_history)
 --
--- Suggerimento:
--- Esegui queste query dopo 01..04 e dopo il popolamento di test (03).
+-- Queste query vanno eseguite dopo la creazione dello schema (01..02),
+--       dopo l’inserimento dei dati di test (03) e dopo viste/query (04).
 -- =========================================================
 
 -- ---------------------------------------------------------
@@ -233,10 +233,6 @@ LEFT JOIN contact c ON c.contact_id = s.service_owner_contact_id
 WHERE s.criticality >= 4
 ORDER BY s.criticality DESC, s.service_code;
 
--- G) QUERY “UTILI” PER DIMOSTRARE CHE IL MODELLO FUNZIONA
--- (adattate ai codici di test reali)
--- ---------------------------------------------------------
-
 -- Q32: Dipendenze di un servizio (asset usati) - esempio su SVC-PORT
 SELECT s.service_code, s.name AS service_name,
        a.asset_code, a.name AS asset_name,
@@ -280,6 +276,7 @@ ORDER BY s.service_code, sp.dependency_type;
 
 -- ---------------------------------------------------------
 -- H) VALIDAZIONE STORICO (asset_history)
+-- In questa sezione verifico che il trigger di versioning produca righe coerenti e non sovrapposte nel tempo.
 -- ---------------------------------------------------------
 
 -- Q36: Storico per un asset (tutte le versioni)
