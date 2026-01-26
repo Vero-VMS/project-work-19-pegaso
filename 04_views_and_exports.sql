@@ -1,10 +1,16 @@
 -- =========================================================
 -- PW19 - Viste/Query per profilo ACN (output strutturato)
 -- File: 04_views_and_exports.sql
--- Scopo: estrarre asset/servizi critici, dipendenze, POC
+-- Scopo: creare viste SQL utili a estrarre in modo ordinato:
+--        - asset e servizi con criticità elevata
+--        - dipendenze tra servizi e asset
+--        - dipendenze tra servizi e fornitori terzi
+--        - referenti interni (POC: Point of Contact / responsabili)
+-- Le viste possono essere interrogate direttamente da pgAdmin oppure esportate in CSV.
 -- =========================================================
 
--- Vista: asset critici (criticality >=4)
+-- Vista: elenco degli asset con criticità elevata (criticality >= 4)
+-- Include anche il referente associato, se presente.
 CREATE OR REPLACE VIEW v_acn_critical_assets AS
 SELECT
   c.name                     AS company_name,
@@ -25,7 +31,8 @@ WHERE a.criticality >= 4
 ORDER BY c.name, a.criticality DESC, a.asset_code;
 
 
--- Vista: servizi critici (criticality >=4)
+-- Vista: elenco dei servizi con criticità elevata (criticality >= 4)
+-- Include anche il referente del servizio, se presente.
 CREATE OR REPLACE VIEW v_acn_critical_services AS
 SELECT
   c.name                     AS company_name,
@@ -44,7 +51,8 @@ WHERE s.criticality >= 4
 ORDER BY c.name, s.criticality DESC, s.service_code;
 
 
--- Vista: dipendenze (servizio -> asset)
+-- Vista: dipendenze servizio -> asset (tabella associativa service_asset)
+-- Mostra per ogni servizio gli asset utilizzati e il loro ruolo/criticità nella dipendenza.
 CREATE OR REPLACE VIEW v_acn_service_asset_dependencies AS
 SELECT
   c.name         AS company_name,
@@ -62,7 +70,8 @@ JOIN company c ON c.company_id = s.company_id
 ORDER BY c.name, s.service_code, a.asset_code;
 
 
--- Vista: dipendenze (servizio -> fornitore)
+-- Vista: dipendenze servizio -> fornitore (tabella associativa service_provider)
+-- Mostra per ogni servizio i fornitori coinvolti e le informazioni contrattuali/sintetiche (se presenti).
 CREATE OR REPLACE VIEW v_acn_service_provider_dependencies AS
 SELECT
   c.name         AS company_name,
@@ -82,8 +91,9 @@ JOIN company c ON c.company_id = s.company_id
 ORDER BY c.name, s.service_code, p.name, sp.dependency_type;
 
 
--- Vista "profilo ACN" semplificata (una riga per servizio con aggregazioni testuali)
--- Utile per esportare un CSV "minimo" con servizi, asset e fornitori correlati.
+-- Vista "profilo minimo" (una riga per servizio)
+-- Aggrega in campi testuali gli asset e i fornitori collegati al servizio.
+-- È utile quando serve un export compatto in CSV, ad esempio per una prima compilazione o un riepilogo.
 CREATE OR REPLACE VIEW v_acn_profile_min AS
 SELECT
   c.name AS company_name,
@@ -113,3 +123,4 @@ ORDER BY c.name, s.service_code;
 -- ESEMPIO EXPORT CSV (da eseguire in psql)
 -- \copy (SELECT * FROM v_acn_profile_min) TO 'acn_profile_min.csv' CSV HEADER;
 -- =========================================================
+
