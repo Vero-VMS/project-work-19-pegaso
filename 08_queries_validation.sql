@@ -1,5 +1,5 @@
 -- =========================================================
--- 05_queries_validation.sql
+-- 08_queries_validation.sql
 -- Query di validazione e verifica del modello dati (PW19)
 -- =========================================================
 -- Scopo: eseguire controlli rapidi per verificare:
