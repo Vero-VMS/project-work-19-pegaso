@@ -1,5 +1,5 @@
 -- =========================================================
--- 06_framework_tables.sql
+-- 04_framework_tables.sql
 -- Framework Nazionale - Profili (CURRENT/TARGET) e Assessment
 -- Estensione: assessment su ASSET e su SERVICE
 -- Target: PostgreSQL
@@ -204,3 +204,4 @@ CREATE TRIGGER trg_fw_validate_service_company
 BEFORE INSERT OR UPDATE ON fw_service_control_assessment
 FOR EACH ROW
 EXECUTE FUNCTION fn_fw_validate_service_company();
+
