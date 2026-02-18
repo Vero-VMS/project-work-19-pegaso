@@ -1,6 +1,6 @@
 -- =========================================================
 -- PW19 - Viste/Query per profilo ACN (output strutturato)
--- File: 04_views_and_exports.sql
+-- File: 06_views_and_exports.sql
 -- Scopo: creare viste SQL utili a estrarre in modo ordinato:
 --        - asset e servizi con criticità elevata
 --        - dipendenze tra servizi e asset
@@ -123,4 +123,5 @@ ORDER BY c.name, s.service_code;
 -- ESEMPIO EXPORT CSV (da eseguire in psql)
 -- \copy (SELECT * FROM v_acn_profile_min) TO 'acn_profile_min.csv' CSV HEADER;
 -- =========================================================
+
 
