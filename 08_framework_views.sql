@@ -1,5 +1,5 @@
 -- =========================================================
--- 08_framework_views.sql
+-- 07_framework_views.sql
 -- Viste per esportare porzioni di profilo secondo Framework Nazionale:
 -- - Dettaglio ASSET e SERVICE
 -- - Filtri CURRENT / TARGET
@@ -169,3 +169,4 @@ ORDER BY cur.company_name, cur.asset_code, cur.control_code;
 -- \copy (SELECT * FROM v_fw_service_profile_current)TO 'fw_service_profile_current.csv'CSV HEADER;
 -- \copy (SELECT * FROM v_fw_service_profile_target) TO 'fw_service_profile_target.csv' CSV HEADER;
 -- \copy (SELECT * FROM v_fw_asset_gap_by_control)   TO 'fw_asset_gap_by_control.csv'   CSV HEADER;
+
