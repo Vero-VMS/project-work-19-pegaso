@@ -231,3 +231,246 @@ Conserva lo storico delle versioni degli asset, consentendo la tracciabilità de
 
 ---
 
+# Modulo Framework
+
+## Tabella: `fw_subcategory`
+
+**Scopo**
+Rappresenta le subcategory del Core del Framework Nazionale per la cybersecurity (requisiti standardizzati) utilizzate per la costruzione dei profili di sicurezza.
+
+**Chiave primaria**
+
+- `subcategory_id`
+
+**Vincoli principali**
+
+UNIQUE (code) – Codice univoco della subcategory.
+
+**Campi**
+
+- `subcategory_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco della subcategory.
+
+- `code` (VARCHAR(20), NOT NULL, UNIQUE) – Codice della subcategory (es. PR.AC-1).
+
+- `name` (VARCHAR(200), NOT NULL) – Nome sintetico della subcategory.
+
+- `description` (TEXT, NULL) – Descrizione estesa del requisito.
+
+- `function_code` (VARCHAR(5), NOT NULL) – Codice funzione (es. ID, PR, DE, RS, RC).
+
+- `category_code` (VARCHAR(20), NOT NULL) – Codice categoria (es. PR.AC).
+
+**Indici (supporto alle query)**
+
+- `idx_fw_subcategory_function` su `function_code`
+
+- `idx_fw_subcategory_category` su `category_code`
+
+---
+
+## Tabella: `fw_control`
+
+**Scopo**
+Catalogo dei controlli di sicurezza (misure organizzative/tecniche) adottabili dall’organizzazione, utilizzati per mappare e soddisfare i requisiti (subcategory) del Framework Nazionale.
+
+**Chiave primaria**
+
+- `control_id`
+
+**Vincoli principali**
+
+UNIQUE (code) – Codice univoco del controllo.
+
+**Campi**
+
+- `control_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco del controllo.
+
+- `code` (VARCHAR(30), NOT NULL, UNIQUE) – Codice del controllo (es. CTRL-IAM).
+
+- `name` (VARCHAR(200), NOT NULL) – Nome del controllo (es. “Gestione identità e accessi”).
+
+- `description` (TEXT, NULL) – Descrizione del controllo.
+
+---
+
+## Tabella associativa: `fw_control_subcategory`
+
+**Scopo**
+Modella la relazione molti-a-molti tra controlli e subcategory. Un controllo può contribuire a più subcategory e una subcategory può essere coperta da più controlli.
+
+**Chiave primaria**
+
+- `(control_id, subcategory_id)`
+
+**Chiavi esterne**
+
+- `control_id` → fw_control(control_id) (ON DELETE CASCADE)
+
+- `subcategory_id` → fw_subcategory(subcategory_id) (ON DELETE CASCADE)
+
+**Campi**
+
+- `control_id` (BIGINT, FK, NOT NULL) – Controllo associato.
+
+- `subcategory_id` (BIGINT, FK, NOT NULL) – Subcategory associata.
+
+**Indice (supporto alle query)**
+
+- `idx_fw_ctrl_subcat_subcat` su `subcategory_id`
+
+---
+
+## Tabella: `fw_profile`
+
+**Scopo**
+Rappresenta un profilo di sicurezza per una specifica azienda, distinguendo tra profilo attuale (CURRENT) e profilo target (TARGET).
+
+**Chiave primaria**
+
+- `profile_id`
+
+**Chiavi esterne**
+
+- `company_id` → company(company_id) (ON DELETE CASCADE)
+
+**Vincoli principali**
+
+- `CHECK (profile_type IN ('CURRENT','TARGET'))` – Tipi ammessi di profilo.
+
+- `UNIQUE (company_id, profile_type)` – Per ogni azienda sono ammessi al massimo un profilo CURRENT e un profilo TARGET.
+
+**Campi**
+
+- `profile_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco del profilo.
+
+- `company_id` (BIGINT, FK, NOT NULL) – Azienda a cui il profilo si riferisce.
+
+- `profile_type` (VARCHAR(10), NOT NULL) – Tipo profilo (CURRENT / TARGET).
+
+- `created_at` (TIMESTAMPTZ, NOT NULL, DEFAULT now()) – Data creazione del profilo.
+
+- `notes` (TEXT, NULL) – Note descrittive sul profilo.
+
+**Indice (supporto alle query)**
+
+- `idx_fw_profile_company` su `company_id`
+
+---
+
+## Tabella: `fw_asset_control_assessment`
+
+**Scopo**
+Registra la valutazione (assessment) del livello di implementazione dei controlli di sicurezza sugli asset, nell’ambito di un profilo (CURRENT/TARGET).
+La valutazione utilizza:
+
+coverage (copertura del controllo)
+
+maturity (livello di maturità del controllo)
+
+**Chiave primaria**
+
+- `assessment_id`
+
+**Chiavi esterne**
+
+- `profile_id` → fw_profile(profile_id) (ON DELETE CASCADE)
+
+- `asset_id` → asset(asset_id) (ON DELETE CASCADE)
+
+- `control_id` → fw_control(control_id) (ON DELETE CASCADE)
+
+**Vincoli principali**
+
+- `UNIQUE (profile_id, asset_id, control_id)` – Evita duplicati per lo stesso asset/controllo nello stesso profilo.
+
+- `CHECK (coverage IN (0.0,0.2,0.4,0.6,0.8,1.0))` – Valori ammessi per la copertura.
+
+- `CHECK (maturity BETWEEN 1 AND 5)` – Valori ammessi per la maturità (se presente).
+
+Vincolo logico: se coverage = 0.0 allora maturity deve essere NULL (non applicabile).
+
+**Campi**
+
+- `assessment_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco della valutazione.
+
+- `profile_id` (BIGINT, FK, NOT NULL) – Profilo di riferimento (CURRENT/TARGET).
+
+- `asset_id` (BIGINT, FK, NOT NULL) – Asset valutato.
+
+- `control_id` (BIGINT, FK, NOT NULL) – Controllo valutato.
+
+- `coverage` (NUMERIC(2,1), NOT NULL) – Copertura del controllo (0.0–1.0 a step 0.2).
+
+- `maturity` (SMALLINT, NULL) – Livello maturità (1–5), NULL se coverage=0.
+
+- `notes` (TEXT, NULL) – Note dell’assessment.
+
+- `evidence` (TEXT, NULL) – Evidenze a supporto (documenti, configurazioni, procedure).
+
+- `updated_at` (TIMESTAMPTZ, NOT NULL, DEFAULT now()) – Timestamp ultimo aggiornamento.
+
+**Indici (supporto alle query)**
+
+- `idx_fw_asset_assessment_profile su profile_id`
+
+- `idx_fw_asset_assessment_asset su asset_id`
+
+- `idx_fw_asset_assessment_control su control_id`
+
+---
+
+## Tabella: `fw_service_control_assessment`
+
+**Scopo**
+Registra la valutazione (assessment) del livello di implementazione dei controlli di sicurezza sui servizi, nell’ambito di un profilo (CURRENT/TARGET), con gli stessi criteri di coverage e maturity utilizzati per gli asset.
+
+**Chiave primaria**
+
+- `assessment_id`
+
+**Chiavi esterne**
+
+- `profile_id` → fw_profile(profile_id) (ON DELETE CASCADE)
+
+- `service_id` → service(service_id) (ON DELETE CASCADE)
+
+- `control_id` → fw_control(control_id) (ON DELETE CASCADE)
+
+**Vincoli principali**
+
+- `UNIQUE (profile_id, service_id, control_id)` – Evita duplicati per lo stesso servizio/controllo nello stesso profilo.
+
+- `CHECK (coverage IN (0.0,0.2,0.4,0.6,0.8,1.0))`
+
+- `CHECK (maturity BETWEEN 1 AND 5)`
+
+Vincolo logico: se coverage = 0.0 allora maturity deve essere NULL.
+
+**Campi**
+
+- `assessment_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco della valutazione.
+
+- `profile_id` (BIGINT, FK, NOT NULL) – Profilo di riferimento.
+
+- `service_id` (BIGINT, FK, NOT NULL) – Servizio valutato.
+
+- `control_id` (BIGINT, FK, NOT NULL) – Controllo valutato.
+
+- `coverage` (NUMERIC(2,1), NOT NULL) – Copertura del controllo.
+
+- `maturity` (SMALLINT, NULL) – Livello maturità (1–5), NULL se coverage=0.
+
+- `notes` (TEXT, NULL) – Note dell’assessment.
+
+- `evidence` (TEXT, NULL) – Evidenze a supporto.
+
+- `updated_at` (TIMESTAMPTZ, NOT NULL, DEFAULT now()) – Timestamp ultimo aggiornamento.
+
+**Indici (supporto alle query)**
+
+- `idx_fw_service_assessment_profile su profile_id`
+
+- `idx_fw_service_assessment_service su service_id`
+
+- `idx_fw_service_assessment_control su control_id`
+
