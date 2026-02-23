@@ -15,7 +15,7 @@ L’obiettivo del progetto è fornire una struttura dati coerente e normalizzata
 
 Il seguente diagramma rappresenta il modello concettuale (Entità-Relazione) del database progettato per il Project Work 19, comprendente le entità principali, le relazioni e le tabelle associative utilizzate per modellare asset, servizi, dipendenze e responsabilità.
 Il modello introduce un modulo di assessment del Framework Nazionale che collega asset e servizi ai controlli di sicurezza e alle subcategory normative, consentendo la generazione del profilo di sicurezza attuale e target.
-![Schema ER](docs/pw19_diagram_er.png)
+![Schema ER](docs/PW19_DiagramER.png)
 
 ---
 
@@ -126,6 +126,7 @@ Il progetto si colloca nel contesto della direttiva europea NIS2 e delle indicaz
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
