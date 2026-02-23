@@ -132,27 +132,35 @@ ORDER BY company_name, profile_type, subcategory_code;
 
 -- ---------------------------------------------------------
 -- D) Gap analysis (TARGET - CURRENT) su ASSET (per control)
---    Super utile per "valutazione" e voto alto
+--    FULL OUTER JOIN per includere anche controlli presenti
+--    solo nel CURRENT o solo nel TARGET
 -- ---------------------------------------------------------
 CREATE OR REPLACE VIEW v_fw_asset_gap_by_control AS
 SELECT
-  cur.company_name,
-  cur.asset_code,
-  cur.asset_name,
-  cur.control_code,
-  cur.control_name,
-  cur.coverage AS current_coverage,
-  tar.coverage AS target_coverage,
-  (tar.coverage - cur.coverage) AS coverage_gap,
+  COALESCE(cur.company_name, tar.company_name) AS company_name,
+  COALESCE(cur.asset_code, tar.asset_code)     AS asset_code,
+  COALESCE(cur.asset_name, tar.asset_name)     AS asset_name,
+  COALESCE(cur.control_code, tar.control_code) AS control_code,
+  COALESCE(cur.control_name, tar.control_name) AS control_name,
+
+  COALESCE(cur.coverage, 0.0) AS current_coverage,
+  COALESCE(tar.coverage, 0.0) AS target_coverage,
+  (COALESCE(tar.coverage, 0.0) - COALESCE(cur.coverage, 0.0)) AS coverage_gap,
+
   cur.maturity AS current_maturity,
   tar.maturity AS target_maturity,
-  (tar.maturity - cur.maturity) AS maturity_gap
+  CASE
+    WHEN cur.maturity IS NULL AND tar.maturity IS NULL THEN NULL
+    WHEN cur.maturity IS NULL THEN tar.maturity
+    WHEN tar.maturity IS NULL THEN -cur.maturity
+    ELSE (tar.maturity - cur.maturity)
+  END AS maturity_gap
 FROM (
   SELECT DISTINCT company_name, asset_code, asset_name, control_code, control_name, coverage, maturity
   FROM v_fw_asset_profile_current
   WHERE subcategory_code IS NOT NULL
 ) cur
-JOIN (
+FULL OUTER JOIN (
   SELECT DISTINCT company_name, asset_code, asset_name, control_code, control_name, coverage, maturity
   FROM v_fw_asset_profile_target
   WHERE subcategory_code IS NOT NULL
@@ -160,13 +168,52 @@ JOIN (
 ON cur.company_name = tar.company_name
 AND cur.asset_code = tar.asset_code
 AND cur.control_code = tar.control_code
-ORDER BY cur.company_name, cur.asset_code, cur.control_code;
+ORDER BY company_name, asset_code, control_code;
+
+-- ---------------------------------------------------------
+-- E) Gap analysis (TARGET - CURRENT) su SERVICE (per control)
+--    (stessa logica della gap analysis sugli asset)
+-- ---------------------------------------------------------
+CREATE OR REPLACE VIEW v_fw_service_gap_by_control AS
+SELECT
+  COALESCE(cur.company_name, tar.company_name)    AS company_name,
+  COALESCE(cur.service_code, tar.service_code)    AS service_code,
+  COALESCE(cur.service_name, tar.service_name)    AS service_name,
+  COALESCE(cur.control_code, tar.control_code)    AS control_code,
+  COALESCE(cur.control_name, tar.control_name)    AS control_name,
+
+  COALESCE(cur.coverage, 0.0) AS current_coverage,
+  COALESCE(tar.coverage, 0.0) AS target_coverage,
+  (COALESCE(tar.coverage, 0.0) - COALESCE(cur.coverage, 0.0)) AS coverage_gap,
+
+  cur.maturity AS current_maturity,
+  tar.maturity AS target_maturity,
+  CASE
+    WHEN cur.maturity IS NULL AND tar.maturity IS NULL THEN NULL
+    WHEN cur.maturity IS NULL THEN tar.maturity
+    WHEN tar.maturity IS NULL THEN -cur.maturity
+    ELSE (tar.maturity - cur.maturity)
+  END AS maturity_gap
+FROM (
+  SELECT DISTINCT company_name, service_code, service_name, control_code, control_name, coverage, maturity
+  FROM v_fw_service_profile_current
+  WHERE subcategory_code IS NOT NULL
+) cur
+FULL OUTER JOIN (
+  SELECT DISTINCT company_name, service_code, service_name, control_code, control_name, coverage, maturity
+  FROM v_fw_service_profile_target
+  WHERE subcategory_code IS NOT NULL
+) tar
+ON cur.company_name = tar.company_name
+AND cur.service_code = tar.service_code
+AND cur.control_code = tar.control_code
+ORDER BY company_name, service_code, control_code;
 
 -- ---------------------------------------------------------
 -- Suggerimenti export CSV (psql):
--- \copy (SELECT * FROM v_fw_asset_profile_current)  TO 'fw_asset_profile_current.csv'  CSV HEADER;
--- \copy (SELECT * FROM v_fw_asset_profile_target)   TO 'fw_asset_profile_target.csv'   CSV HEADER;
--- \copy (SELECT * FROM v_fw_service_profile_current)TO 'fw_service_profile_current.csv'CSV HEADER;
--- \copy (SELECT * FROM v_fw_service_profile_target) TO 'fw_service_profile_target.csv' CSV HEADER;
--- \copy (SELECT * FROM v_fw_asset_gap_by_control)   TO 'fw_asset_gap_by_control.csv'   CSV HEADER;
-
+-- \copy (SELECT * FROM v_fw_asset_profile_current)   TO 'fw_asset_profile_current.csv'   CSV HEADER;
+-- \copy (SELECT * FROM v_fw_asset_profile_target)    TO 'fw_asset_profile_target.csv'    CSV HEADER;
+-- \copy (SELECT * FROM v_fw_service_profile_current) TO 'fw_service_profile_current.csv' CSV HEADER;
+-- \copy (SELECT * FROM v_fw_service_profile_target)  TO 'fw_service_profile_target.csv'  CSV HEADER;
+-- \copy (SELECT * FROM v_fw_asset_gap_by_control)    TO 'fw_asset_gap_by_control.csv'    CSV HEADER;
+-- \copy (SELECT * FROM v_fw_service_gap_by_control)  TO 'fw_service_gap_by_control.csv'  CSV HEADER;
