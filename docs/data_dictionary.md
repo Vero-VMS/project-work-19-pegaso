@@ -474,3 +474,7 @@ Vincolo logico: se coverage = 0.0 allora maturity deve essere NULL.
 
 - `idx_fw_service_assessment_control su control_id`
 
+---
+**Nota progettuale (Framework)**
+
+Le tabelle `fw_subcategory` e `fw_control` rappresentano rispettivamente il riferimento normativo (requisiti) e il catalogo dei controlli applicabili. Il profilo (CURRENT/TARGET) è modellato tramite fw_profile. Gli assessment su asset e servizi consentono la produzione di viste SQL per l’export dei profili e la gap analysis (TARGET–CURRENT).
