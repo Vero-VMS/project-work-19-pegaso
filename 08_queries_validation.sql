@@ -348,4 +348,156 @@ FROM service
 GROUP BY criticality
 ORDER BY criticality;
 
+-- ---------------------------------------------------------
+-- J) VALIDAZIONE FRAMEWORK (controlli, subcategory, profili)
+-- Scopo: dimostrare che la parte "profilo" include:
+--   - controlli e subcategory (mapping completo)
+--   - profili CURRENT/TARGET per azienda
+--   - assessment coerenti con company e con regole coverage/maturity
+-- ---------------------------------------------------------
+
+-- Q44: Subcategory presenti nel framework (conteggio)
+SELECT COUNT(*) AS fw_subcategories
+FROM fw_subcategory;
+
+-- Q45: Controlli presenti nel framework (conteggio)
+SELECT COUNT(*) AS fw_controls
+FROM fw_control;
+
+-- Q46: Controlli senza subcategory (NON dovrebbero esistere)
+-- Se torna righe, significa che il profilo/framework non include subcategory per quei controlli.
+SELECT
+  c.control_id, c.code AS control_code, c.name AS control_name
+FROM fw_control c
+LEFT JOIN fw_control_subcategory cs ON cs.control_id = c.control_id
+WHERE cs.control_id IS NULL
+ORDER BY c.code;
+
+-- Q47: Subcategory senza controlli (può essere accettabile, ma segnala copertura incompleta)
+SELECT
+  s.subcategory_id, s.code AS subcategory_code, s.name AS subcategory_name
+FROM fw_subcategory s
+LEFT JOIN fw_control_subcategory cs ON cs.subcategory_id = s.subcategory_id
+WHERE cs.subcategory_id IS NULL
+ORDER BY s.code;
+
+-- Q48: Verifica che per ogni company esista al massimo un profilo CURRENT e uno TARGET
+-- (grazie al vincolo UNIQUE non dovrebbe mai tornare righe)
+SELECT company_id, profile_type, COUNT(*) AS cnt
+FROM fw_profile
+GROUP BY company_id, profile_type
+HAVING COUNT(*) > 1;
+
+-- Q49: Assessment ASSET orfani (profile / asset / control non validi) - dovrebbe tornare 0 righe
+SELECT a.*
+FROM fw_asset_control_assessment a
+LEFT JOIN fw_profile p ON p.profile_id = a.profile_id
+LEFT JOIN asset s ON s.asset_id = a.asset_id
+LEFT JOIN fw_control c ON c.control_id = a.control_id
+WHERE p.profile_id IS NULL OR s.asset_id IS NULL OR c.control_id IS NULL;
+
+-- Q50: Assessment SERVICE orfani (profile / service / control non validi) - dovrebbe tornare 0 righe
+SELECT a.*
+FROM fw_service_control_assessment a
+LEFT JOIN fw_profile p ON p.profile_id = a.profile_id
+LEFT JOIN service s ON s.service_id = a.service_id
+LEFT JOIN fw_control c ON c.control_id = a.control_id
+WHERE p.profile_id IS NULL OR s.service_id IS NULL OR c.control_id IS NULL;
+
+-- Q51: Coerenza company tra profilo e asset (dovrebbe tornare 0 righe)
+-- (il trigger già la impedisce, ma questa query è "evidence" per la tesi)
+SELECT
+  a.assessment_id,
+  p.company_id AS profile_company,
+  asst.company_id AS asset_company
+FROM fw_asset_control_assessment a
+JOIN fw_profile p ON p.profile_id = a.profile_id
+JOIN asset asst ON asst.asset_id = a.asset_id
+WHERE p.company_id <> asst.company_id;
+
+-- Q52: Coerenza company tra profilo e service (dovrebbe tornare 0 righe)
+SELECT
+  a.assessment_id,
+  p.company_id AS profile_company,
+  srv.company_id AS service_company
+FROM fw_service_control_assessment a
+JOIN fw_profile p ON p.profile_id = a.profile_id
+JOIN service srv ON srv.service_id = a.service_id
+WHERE p.company_id <> srv.company_id;
+
+-- Q53: Controlli presenti nel TARGET ma assenti nel CURRENT (per ASSET)
+-- Utile per dimostrare che la gap analysis intercetta controlli mancanti.
+SELECT
+  tar.company_name,
+  tar.asset_code,
+  tar.control_code,
+  tar.control_name
+FROM (
+  SELECT DISTINCT company_name, asset_code, control_code, control_name
+  FROM v_fw_asset_profile_target
+  WHERE subcategory_code IS NOT NULL
+) tar
+LEFT JOIN (
+  SELECT DISTINCT company_name, asset_code, control_code
+  FROM v_fw_asset_profile_current
+  WHERE subcategory_code IS NOT NULL
+) cur
+ON cur.company_name = tar.company_name
+AND cur.asset_code = tar.asset_code
+AND cur.control_code = tar.control_code
+WHERE cur.control_code IS NULL
+ORDER BY tar.company_name, tar.asset_code, tar.control_code;
+
+-- Q54: Controlli presenti nel TARGET ma assenti nel CURRENT (per SERVICE)
+SELECT
+  tar.company_name,
+  tar.service_code,
+  tar.control_code,
+  tar.control_name
+FROM (
+  SELECT DISTINCT company_name, service_code, control_code, control_name
+  FROM v_fw_service_profile_target
+  WHERE subcategory_code IS NOT NULL
+) tar
+LEFT JOIN (
+  SELECT DISTINCT company_name, service_code, control_code
+  FROM v_fw_service_profile_current
+  WHERE subcategory_code IS NOT NULL
+) cur
+ON cur.company_name = tar.company_name
+AND cur.service_code = tar.service_code
+AND cur.control_code = tar.control_code
+WHERE cur.control_code IS NULL
+ORDER BY tar.company_name, tar.service_code, tar.control_code;
+
+-- Q55: Copertura media per funzione del Framework (ASSET)
+-- Mostra il livello medio di implementazione CURRENT/TARGET
+-- aggregato per funzione (ID, PR, DE, RS, RC)
+
+SELECT
+  company_name,
+  profile_type,
+  function_code,
+  ROUND(AVG(coverage)::numeric, 2) AS avg_coverage,
+  ROUND(AVG(maturity)::numeric, 2) AS avg_maturity,
+  COUNT(DISTINCT control_code) AS controls_considered
+FROM v_fw_asset_profile_detail
+WHERE subcategory_code IS NOT NULL
+GROUP BY company_name, profile_type, function_code
+ORDER BY company_name, profile_type, function_code;
+
+-- Q56: Copertura media per funzione del Framework (SERVICE)
+
+SELECT
+  company_name,
+  profile_type,
+  function_code,
+  ROUND(AVG(coverage)::numeric, 2) AS avg_coverage,
+  ROUND(AVG(maturity)::numeric, 2) AS avg_maturity,
+  COUNT(DISTINCT control_code) AS controls_considered
+FROM v_fw_service_profile_detail
+WHERE subcategory_code IS NOT NULL
+GROUP BY company_name, profile_type, function_code
+ORDER BY company_name, profile_type, function_code;
+
 -- Fine file
