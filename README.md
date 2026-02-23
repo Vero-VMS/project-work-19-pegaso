@@ -121,11 +121,36 @@ Il progetto si colloca nel contesto della direttiva europea NIS2 e delle indicaz
 
 ---
 
+## Architettura logica del modulo Framework
+
+Il modulo di assessment della sicurezza è stato progettato secondo un approccio modulare e normalizzato, con l’obiettivo di separare in modo chiaro la definizione dei controlli normativi dalla loro applicazione operativa su asset e servizi aziendali.
+
+In particolare, il modello distingue:
+
+- la definizione astratta dei controlli di sicurezza;
+
+- la loro classificazione attraverso le subcategory del Framework Nazionale per la Cybersecurity;
+
+- la relazione tra controlli e asset/servizi oggetto di valutazione;
+
+- la misurazione del livello di implementazione corrente (CURRENT);
+
+- la definizione del livello di sicurezza desiderato (TARGET).
+
+Questa separazione logica consente di mantenere i controlli come entità riutilizzabili e indipendenti dagli oggetti valutati, evitando duplicazioni e garantendo maggiore flessibilità del sistema. L’associazione tra controlli e asset/servizi avviene tramite tabelle di assessment dedicate, che permettono di registrare in modo strutturato lo stato di conformità e il livello di maturità raggiunto.
+
+La presenza dei profili CURRENT e TARGET rende possibile effettuare in modo diretto analisi di scostamento (gap analysis), utili per individuare le aree di miglioramento e supportare processi di pianificazione degli interventi di sicurezza.
+
+Dal punto di vista progettuale, l’intero modello dati è strutturato in terza forma normale (3NF), al fine di evitare ridondanze e garantire coerenza e integrità referenziale tramite l’utilizzo di chiavi primarie, chiavi esterne e vincoli espliciti. Questa impostazione consente di mantenere il database scalabile ed estendibile, facilitando l’eventuale aggiornamento o integrazione futura di ulteriori controlli o requisiti normativi.
+
+---
+
 ## Riferimenti
 
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
