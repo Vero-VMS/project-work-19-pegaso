@@ -106,6 +106,7 @@ Diagramma Entità-Relazione del database.
 - `08c_incident_views.sql` – Viste incidenti e stato notifiche  
 
 - `08b_incident_seed.sql` – Dataset dimostrativo incidenti  
+
 Al termine dell’esecuzione il database risulta pronto per l’interrogazione e per la produzione di output strutturati.
 
 Il file `09_queries_validation.sql` contiene query di verifica e di esempio, utili per controllare la correttezza del modello dati ma non necessari alla fase di inizializzazione.
@@ -189,6 +190,7 @@ L’architettura prevede:
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
