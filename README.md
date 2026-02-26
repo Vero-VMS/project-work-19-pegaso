@@ -97,7 +97,7 @@ Diagramma Entità-Relazione del database.
 - `08b_incident_seed.sql` – Dataset dimostrativo incidenti  
 Al termine dell’esecuzione il database risulta pronto per l’interrogazione e per la produzione di output strutturati.
 
-Il file `08_queries_validation.sql` contiene query di verifica e di esempio, utili per controllare la correttezza del modello dati ma non necessari alla fase di inizializzazione.
+Il file `09_queries_validation.sql` contiene query di verifica e di esempio, utili per controllare la correttezza del modello dati ma non necessari alla fase di inizializzazione.
 
 ---
 
@@ -179,6 +179,7 @@ Questa separazione consente di mantenere modularità, riusabilità e coerenza co
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
