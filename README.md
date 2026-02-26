@@ -167,7 +167,7 @@ Questa separazione logica consente di mantenere i controlli come entità riutili
 
 La presenza dei profili CURRENT e TARGET rende possibile effettuare in modo diretto analisi di scostamento (gap analysis), utili per individuare le aree di miglioramento e supportare processi di pianificazione degli interventi di sicurezza.
 
-Dal punto di vista progettuale, l’intero modello dati è strutturato in terza forma normale (3NF), al fine di evitare ridondanze e garantire coerenza e integrità referenziale tramite l’utilizzo di chiavi primarie, chiavi esterne e vincoli espliciti. Questa impostazione consente di mantenere il database scalabile ed estendibile, facilitando l’eventuale aggiornamento o integrazione futura di ulteriori controlli o requisiti normativi.
+---
 
 ## Architettura logica del modulo Incident Management
 
@@ -182,7 +182,6 @@ L’architettura prevede:
 - una relazione molti-a-molti tra incident e asset per modellare l’impatto;
 - una entità `incident_notification` per tracciare le comunicazioni verso l’autorità competente.
 
-Questa separazione consente di mantenere modularità, riusabilità e coerenza con il ciclo di vita della cybersecurity previsto dalla NIS2 (prevenzione, rilevazione, risposta e notifica).
 ---
 
 ## Riferimenti
@@ -190,6 +189,7 @@ Questa separazione consente di mantenere modularità, riusabilità e coerenza co
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
