@@ -478,3 +478,109 @@ Vincolo logico: se coverage = 0.0 allora maturity deve essere NULL.
 **Nota progettuale (Framework)**
 
 Le tabelle `fw_subcategory` e `fw_control` rappresentano rispettivamente il riferimento normativo (requisiti) e il catalogo dei controlli applicabili. Il profilo (CURRENT/TARGET) è modellato tramite fw_profile. Gli assessment su asset e servizi consentono la produzione di viste SQL per l’export dei profili e la gap analysis (TARGET–CURRENT).
+
+---
+## Tabella: `incident`
+
+Scopo
+Registra gli eventi di sicurezza rilevati dall’organizzazione, in coerenza con gli obblighi previsti dalla Direttiva NIS2.
+Consente di tracciare informazioni descrittive, stato dell’incidente, livello di gravità e indicazione di “incidente significativo” ai fini degli obblighi di notifica.
+
+Chiave primaria
+
+- `incident_id`
+
+Relazioni
+
+Referenziata da: incident_asset, incident_notification
+
+FK verso: company
+
+Campi
+
+- `incident_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco dell’incidente.
+
+- `company_id` (BIGINT, FK, NOT NULL) – Azienda a cui l’incidente è associato.
+
+- `incident_code` (VARCHAR, NOT NULL) – Codice identificativo leggibile (es. INC-2026-001), univoco per azienda.
+
+- `title` (VARCHAR, NOT NULL) – Titolo sintetico dell’incidente.
+
+- `description` (TEXT, NULL) – Descrizione dettagliata dell’evento.
+
+- `detected_at` (TIMESTAMPTZ, NOT NULL) – Data e ora di rilevazione dell’incidente.
+
+- `occurred_at` (TIMESTAMPTZ, NULL) – Data e ora presunta di accadimento.
+
+- `closed_at` (TIMESTAMPTZ, NULL) – Data di chiusura dell’incidente.
+
+- `severity` (VARCHAR, NOT NULL) – Livello di gravità (LOW, MEDIUM, HIGH, CRITICAL).
+
+- `status` (VARCHAR, NOT NULL) – Stato corrente dell’incidente (OPEN, UNDER_ANALYSIS, CONTAINED, RESOLVED, CLOSED).
+
+- `is_significant` (BOOLEAN, NOT NULL) – Indica se l’incidente è classificato come significativo ai fini NIS2.
+
+- `notes` (TEXT, NULL) – Annotazioni interne.
+
+---
+
+## Tabella: `incident_asset`
+
+Scopo
+Modella la relazione molti-a-molti tra incidenti e asset.
+Consente di indicare quali asset siano stati coinvolti o impattati da uno specifico evento di sicurezza.
+
+Chiave primaria
+
+- `(incident_id, asset_id)`
+
+Relazioni
+
+FK verso: incident
+
+FK verso: asset
+
+Campi
+
+- `incident_id` (BIGINT, PK, FK, NOT NULL) – Identificativo dell’incidente.
+
+- `asset_id` (BIGINT, PK, FK, NOT NULL) – Identificativo dell’asset coinvolto.
+
+- `impact_type` (VARCHAR, NULL) – Tipo di impatto (CONFIDENTIALITY, INTEGRITY, AVAILABILITY, OTHER).
+
+- `impact_notes` (TEXT, NULL) – Descrizione dell’impatto sull’asset.
+
+---
+
+## Tabella: `incident_notification`
+
+Scopo
+Traccia le notifiche inviate all’autorità competente (es. ACN) in relazione a un incidente significativo, in conformità agli obblighi di notifica previsti dalla NIS2.
+
+Chiave primaria
+
+- `notification_id`
+
+Relazioni
+
+FK verso: incident
+
+Campi
+
+- `notification_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco della notifica.
+
+- `incident_id` (BIGINT, FK, NOT NULL) – Incidente a cui la notifica si riferisce.
+
+- `notification_type` (VARCHAR, NOT NULL) – Tipologia di notifica (EARLY_24H, FULL_72H, FINAL_1M).
+
+- `authority` (VARCHAR, NOT NULL) – Autorità destinataria (default: ACN).
+
+- `status` (VARCHAR, NOT NULL) – Stato della notifica (DRAFT, SENT, ACKNOWLEDGED, CANCELLED).
+
+- `due_at` (TIMESTAMPTZ, NULL) – Scadenza teorica prevista per l’invio.
+
+- `sent_at` (TIMESTAMPTZ, NULL) – Data e ora effettiva di invio.
+
+- `reference_code` (VARCHAR, NULL) – Codice o protocollo assegnato dall’autorità.
+
+- `content_summary` (TEXT, NULL) – Sintesi del contenuto trasmesso.
