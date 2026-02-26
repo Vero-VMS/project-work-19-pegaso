@@ -147,14 +147,25 @@ SELECT
   COALESCE(tar.coverage, 0.0) AS target_coverage,
   (COALESCE(tar.coverage, 0.0) - COALESCE(cur.coverage, 0.0)) AS coverage_gap,
 
+-- Il gap viene calcolato solo se sono definiti sia il valore CURRENT
+-- sia il valore TARGET. In assenza di un obiettivo formalizzato (TARGET NULL),
+-- il sistema restituisce NULL, indicando che non è possibile determinare
+-- uno scostamento misurabile.
+-- Questa scelta evita interpretazioni fuorvianti (es. gap negativi)
+-- quando non è stato definito un livello di maturità o copertura obiettivo.
+  cur.coverage AS current_coverage,
+  tar.coverage AS target_coverage,
+CASE
+  WHEN cur.coverage IS NULL OR tar.coverage IS NULL THEN NULL
+  ELSE (tar.coverage - cur.coverage)
+END AS coverage_gap,
+  
   cur.maturity AS current_maturity,
   tar.maturity AS target_maturity,
-  CASE
-    WHEN cur.maturity IS NULL AND tar.maturity IS NULL THEN NULL
-    WHEN cur.maturity IS NULL THEN tar.maturity
-    WHEN tar.maturity IS NULL THEN -cur.maturity
-    ELSE (tar.maturity - cur.maturity)
-  END AS maturity_gap
+CASE
+  WHEN cur.maturity IS NULL OR tar.maturity IS NULL THEN NULL
+  ELSE (tar.maturity - cur.maturity)
+END AS maturity_gap
 FROM (
   SELECT DISTINCT company_name, asset_code, asset_name, control_code, control_name, coverage, maturity
   FROM v_fw_asset_profile_current
@@ -186,14 +197,19 @@ SELECT
   COALESCE(tar.coverage, 0.0) AS target_coverage,
   (COALESCE(tar.coverage, 0.0) - COALESCE(cur.coverage, 0.0)) AS coverage_gap,
 
+  cur.coverage AS current_coverage,
+  tar.coverage AS target_coverage,
+CASE
+  WHEN cur.coverage IS NULL OR tar.coverage IS NULL THEN NULL
+  ELSE (tar.coverage - cur.coverage)
+END AS coverage_gap,
+  
   cur.maturity AS current_maturity,
   tar.maturity AS target_maturity,
-  CASE
-    WHEN cur.maturity IS NULL AND tar.maturity IS NULL THEN NULL
-    WHEN cur.maturity IS NULL THEN tar.maturity
-    WHEN tar.maturity IS NULL THEN -cur.maturity
-    ELSE (tar.maturity - cur.maturity)
-  END AS maturity_gap
+CASE
+  WHEN cur.maturity IS NULL OR tar.maturity IS NULL THEN NULL
+  ELSE (tar.maturity - cur.maturity)
+END AS maturity_gap
 FROM (
   SELECT DISTINCT company_name, service_code, service_name, control_code, control_name, coverage, maturity
   FROM v_fw_service_profile_current
@@ -217,3 +233,4 @@ ORDER BY company_name, service_code, control_code;
 -- \copy (SELECT * FROM v_fw_service_profile_target)  TO 'fw_service_profile_target.csv'  CSV HEADER;
 -- \copy (SELECT * FROM v_fw_asset_gap_by_control)    TO 'fw_asset_gap_by_control.csv'    CSV HEADER;
 -- \copy (SELECT * FROM v_fw_service_gap_by_control)  TO 'fw_service_gap_by_control.csv'  CSV HEADER;
+
