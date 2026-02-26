@@ -18,11 +18,12 @@ Il modello introduce un modulo di assessment del Framework Nazionale che collega
 Inoltre, il diagramma include un modulo dedicato alla gestione degli incidenti di sicurezza, progettato come estensione modulare coerente con gli obblighi previsti dalla Direttiva NIS2. Tale modulo consente di registrare eventi incidentali, associare gli asset coinvolti tramite un’entità associativa molti-a-molti e tracciare le notifiche verso l’autorità competente (es. ACN), in conformità ai requisiti di early warning e reporting previsti dalla normativa.
 
 L’architettura complessiva mantiene una separazione logica tra:
--gestione inventariale e governance degli asset,
 
--assessment dei controlli secondo Framework,
+- gestione inventariale e governance degli asset,
 
--gestione reattiva degli incidenti.
+- assessment dei controlli secondo Framework,
+
+- gestione reattiva degli incidenti.
 
 Questa suddivisione consente modularità, riusabilità ed estensibilità futura del sistema.
 ![Schema ER](docs/PW19_DiagramER.png)
@@ -189,6 +190,7 @@ Questa separazione consente di mantenere modularità, riusabilità e coerenza co
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
