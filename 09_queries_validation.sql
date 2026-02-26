@@ -500,4 +500,112 @@ WHERE subcategory_code IS NOT NULL
 GROUP BY company_name, profile_type, function_code
 ORDER BY company_name, profile_type, function_code;
 
+-- ---------------------------------------------------------
+-- K) VALIDAZIONE INCIDENTI (NIS2 - incident management & notification)
+-- Scopo: dimostrare che il modulo incidenti supporta:
+--   - registrazione incidenti significativi
+--   - associazione ad asset impattati (N-M)
+--   - tracciamento delle notifiche (24h / 72h / 1 mese)
+--   - coerenza company tra incident e asset collegati
+-- ---------------------------------------------------------
+
+-- Q57: Conteggio incidenti, collegamenti incident-asset e notifiche
+SELECT COUNT(*) AS incidents
+FROM incident;
+
+SELECT COUNT(*) AS incident_asset_links
+FROM incident_asset;
+
+SELECT COUNT(*) AS incident_notifications
+FROM incident_notification;
+
+-- Q58: Incidenti significativi (flag) e loro stato
+SELECT
+  i.incident_code,
+  i.severity,
+  i.status,
+  i.detected_at,
+  i.closed_at
+FROM incident i
+WHERE i.is_significant = TRUE
+ORDER BY i.detected_at DESC, i.incident_code;
+
+-- Q59: Incidenti significativi senza alcuna notifica (NON dovrebbe accadere in un processo maturo)
+-- Utile come controllo di completezza del processo di notifica.
+SELECT
+  co.name AS company_name,
+  i.incident_code,
+  i.severity,
+  i.status,
+  i.detected_at
+FROM incident i
+JOIN company co ON co.company_id = i.company_id
+LEFT JOIN incident_notification n ON n.incident_id = i.incident_id
+WHERE i.is_significant = TRUE
+GROUP BY co.name, i.incident_id, i.incident_code, i.severity, i.status, i.detected_at
+HAVING COUNT(n.notification_id) = 0
+ORDER BY co.name, i.detected_at DESC;
+
+-- Q60: Verifica unicità notifiche per tipo (vincolo UNIQUE dovrebbe impedire duplicati)
+-- Se torna righe, significa che esistono più notifiche dello stesso tipo per lo stesso incidente.
+SELECT incident_id, notification_type, COUNT(*) AS cnt
+FROM incident_notification
+GROUP BY incident_id, notification_type
+HAVING COUNT(*) > 1;
+
+-- Q61: Notifiche inviate oltre la scadenza (sent_at > due_at) - dovrebbe tornare 0 righe nei casi corretti
+SELECT
+  co.name AS company_name,
+  i.incident_code,
+  n.notification_type,
+  n.due_at,
+  n.sent_at,
+  (n.sent_at - n.due_at) AS delay
+FROM incident_notification n
+JOIN incident i ON i.incident_id = n.incident_id
+JOIN company co ON co.company_id = i.company_id
+WHERE n.sent_at IS NOT NULL
+  AND n.due_at IS NOT NULL
+  AND n.sent_at > n.due_at
+ORDER BY co.name, i.incident_code, n.notification_type;
+
+-- Q62: Incidenti significativi senza EARLY WARNING 24h (controllo "processo")
+-- Nota: non impone che sia SENT, controlla che esista almeno la notifica di tipo EARLY_24H.
+SELECT
+  co.name AS company_name,
+  i.incident_code,
+  i.detected_at
+FROM incident i
+JOIN company co ON co.company_id = i.company_id
+LEFT JOIN incident_notification n
+  ON n.incident_id = i.incident_id
+ AND n.notification_type = 'EARLY_24H'
+WHERE i.is_significant = TRUE
+  AND n.notification_id IS NULL
+ORDER BY co.name, i.detected_at DESC;
+
+-- Q63: Coerenza company tra incident e asset collegati (dovrebbe tornare 0 righe)
+-- (il trigger già la impedisce, ma questa query è "evidence" per la tesi)
+SELECT
+  ia.incident_id,
+  i.company_id AS incident_company,
+  ia.asset_id,
+  a.company_id AS asset_company
+FROM incident_asset ia
+JOIN incident i ON i.incident_id = ia.incident_id
+JOIN asset a ON a.asset_id = ia.asset_id
+WHERE i.company_id <> a.company_id;
+
+-- Q64: Asset più impattati (numero di incidenti associati) - utile per report
+SELECT
+  co.name AS company_name,
+  a.asset_code,
+  a.name AS asset_name,
+  COUNT(DISTINCT ia.incident_id) AS incidents_count
+FROM incident_asset ia
+JOIN incident i ON i.incident_id = ia.incident_id
+JOIN company co ON co.company_id = i.company_id
+JOIN asset a ON a.asset_id = ia.asset_id
+GROUP BY co.name, a.asset_code, a.name
+ORDER BY incidents_count DESC, a.asset_code;
 -- Fine file
