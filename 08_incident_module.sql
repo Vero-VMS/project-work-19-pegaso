@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS incident (
   closed_at       TIMESTAMPTZ NULL,
 
   severity        VARCHAR(10) NOT NULL CHECK (severity IN ('LOW','MEDIUM','HIGH','CRITICAL')),
-  status          VARCHAR(12) NOT NULL CHECK (status IN ('OPEN','UNDER_ANALYSIS','CONTAINED','RESOLVED','CLOSED')),
+  status          VARCHAR(20) NOT NULL CHECK (status IN ('OPEN','UNDER_ANALYSIS','CONTAINED','RESOLVED','CLOSED')),
 
   is_significant  BOOLEAN NOT NULL DEFAULT FALSE,  -- incidente "significativo" ai fini NIS2 (flag)
   notes           TEXT,
