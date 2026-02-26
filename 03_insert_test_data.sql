@@ -143,3 +143,16 @@ SELECT s.service_id, p.provider_id, 'Connettività', 'CTR-002', 'Linea primaria'
 FROM service s, provider p
 WHERE s.service_code='SVC-EMAIL' AND p.name='NetFast';
 
+
+-- 8) Test storicizzazione (asset_history)
+-- Eseguo un aggiornamento controllato su un asset per generare almeno una riga nello storico,
+-- così è possibile verificare concretamente il funzionamento del trigger di versioning.
+
+UPDATE asset
+SET criticality = 4
+WHERE asset_code = 'SRV-001';
+
+-- (opzionale) secondo update per mostrare più versioni
+UPDATE asset
+SET status = 'INACTIVE'
+WHERE asset_code = 'SRV-001';
