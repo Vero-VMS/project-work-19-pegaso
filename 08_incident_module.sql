@@ -1,5 +1,5 @@
 -- =========================================================
--- 09_incident_module.sql
+-- 08_incident_module.sql
 -- Estensione NIS2: gestione incidenti + obblighi di notifica
 -- Target: PostgreSQL
 -- =========================================================
