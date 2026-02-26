@@ -44,7 +44,16 @@ Creazione di viste e query di estrazione per la produzione di output strutturati
 - `07_framework_views.sql`
 Viste dedicate alla generazione del profilo di sicurezza secondo il Framework Nazionale (profili CURRENT e TARGET e gap analysis).
 
-- `08_queries_validation.sql`
+- `08_incident_module.sql`
+Introduzione del modulo di gestione degli incidenti di sicurezza, in coerenza con gli obblighi previsti dalla Direttiva NIS2. Il modulo consente di registrare eventi incidentali, associare gli asset coinvolti e tracciare le notifiche verso l’autorità competente (early warning 24h, notifica 72h, relazione finale).
+
+- `08b_incident_seed.sql`
+Inserimento di un dataset dimostrativo relativo a incidenti e notifiche, utile per verificare il corretto funzionamento delle relazioni e delle viste.
+
+- `08c_incident_views.sql`
+Viste dedicate alla reportistica degli incidenti e allo stato delle notifiche, utili per verificare la conformità temporale agli obblighi NIS2.
+
+- `09_queries_validation.sql`
 Insieme di query di validazione per verificare la correttezza del modello dati, delle relazioni e delle dipendenze.
 
 - `docs/data_dictionary.md`
@@ -81,6 +90,11 @@ Diagramma Entità-Relazione del database.
 
 -`07_framework_views.sql` – Viste profilo sicurezza e gap analysis
 
+- `08_incident_module.sql` – Modulo gestione incidenti e notifiche NIS2  
+
+- `08c_incident_views.sql` – Viste incidenti e stato notifiche  
+
+- `08b_incident_seed.sql` – Dataset dimostrativo incidenti  
 Al termine dell’esecuzione il database risulta pronto per l’interrogazione e per la produzione di output strutturati.
 
 Il file `08_queries_validation.sql` contiene query di verifica e di esempio, utili per controllare la correttezza del modello dati ma non necessari alla fase di inizializzazione.
@@ -117,7 +131,8 @@ I file CSV generati costituiscono un esempio di output strutturato direttamente 
 
 ## Contesto normativo
 
-Il progetto si colloca nel contesto della direttiva europea NIS2 e delle indicazioni dell’Agenzia per la Cybersicurezza Nazionale (ACN) per la gestione degli asset, dei servizi critici e delle dipendenze da fornitori terzi.
+Il progetto si colloca nel contesto della direttiva europea NIS2 e delle indicazioni dell’Agenzia per la Cybersicurezza Nazionale (ACN) per la gestione degli asset, dei servizi critici e delle dipendenze da fornitori terzi. Oltre alla gestione inventariale e al modulo di assessment dei controlli (profili CURRENT e TARGET), il progetto integra un’estensione dedicata alla tracciabilità degli incidenti di sicurezza e agli obblighi di notifica previsti dalla Direttiva NIS2. 
+Tale modulo consente di registrare incidenti significativi, associare gli asset coinvolti e monitorare le comunicazioni verso l’autorità competente (ACN), in linea con i requisiti di early warning (24h), notifica completa (72h) e relazione finale.
 
 ---
 
@@ -143,6 +158,20 @@ La presenza dei profili CURRENT e TARGET rende possibile effettuare in modo dire
 
 Dal punto di vista progettuale, l’intero modello dati è strutturato in terza forma normale (3NF), al fine di evitare ridondanze e garantire coerenza e integrità referenziale tramite l’utilizzo di chiavi primarie, chiavi esterne e vincoli espliciti. Questa impostazione consente di mantenere il database scalabile ed estendibile, facilitando l’eventuale aggiornamento o integrazione futura di ulteriori controlli o requisiti normativi.
 
+## Architettura logica del modulo Incident Management
+
+Il modulo di gestione incidenti è stato progettato come estensione indipendente rispetto al modulo Framework, mantenendo separazione tra:
+
+- gestione preventiva e assessment dei controlli;
+- gestione reattiva degli eventi incidentali.
+
+L’architettura prevede:
+
+- una entità `incident` collegata alla company;
+- una relazione molti-a-molti tra incident e asset per modellare l’impatto;
+- una entità `incident_notification` per tracciare le comunicazioni verso l’autorità competente.
+
+Questa separazione consente di mantenere modularità, riusabilità e coerenza con il ciclo di vita della cybersecurity previsto dalla NIS2 (prevenzione, rilevazione, risposta e notifica).
 ---
 
 ## Riferimenti
@@ -150,6 +179,7 @@ Dal punto di vista progettuale, l’intero modello dati è strutturato in terza 
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
