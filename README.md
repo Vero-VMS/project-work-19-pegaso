@@ -87,19 +87,19 @@ Diagramma Entità-Relazione del database.
 1. Crea un database vuoto (es. `pw19_nis2`).
 2. Esegui in ordine gli script:
 
--`01_create_tables.sql` – Creazione delle tabelle e dei vincoli
+- `01_create_tables.sql` – Creazione delle tabelle e dei vincoli
 
--`02_triggers_versioning.sql` – Versioning degli asset
+- `02_triggers_versioning.sql` – Versioning degli asset
 
--`03_insert_test_data.sql` – Inserimento dati di test
+- `03_insert_test_data.sql` – Inserimento dati di test
 
--`04_framework_tables.sql` – Strutture del Framework Nazionale
+- `04_framework_tables.sql` – Strutture del Framework Nazionale
 
--`05_framework_seed.sql` – Popolamento assessment sicurezza
+- `05_framework_seed.sql` – Popolamento assessment sicurezza
 
--`06_views_and_exports.sql` – Viste ACN inventariali
+- `06_views_and_exports.sql` – Viste ACN inventariali
 
--`07_framework_views.sql` – Viste profilo sicurezza e gap analysis
+- `07_framework_views.sql` – Viste profilo sicurezza e gap analysis
 
 - `08_incident_module.sql` – Modulo gestione incidenti e notifiche NIS2  
 
@@ -189,6 +189,7 @@ L’architettura prevede:
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
