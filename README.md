@@ -101,11 +101,12 @@ Diagramma Entità-Relazione del database.
 
 - `07_framework_views.sql` – Viste profilo sicurezza e gap analysis
 
-- `08_incident_module.sql` – Modulo gestione incidenti e notifiche NIS2  
+- `08_incident_module.sql` – Modulo gestione incidenti e notifiche NIS2
+
+- `08b_incident_seed.sql` – Dataset dimostrativo incidenti    
 
 - `08c_incident_views.sql` – Viste incidenti e stato notifiche  
 
-- `08b_incident_seed.sql` – Dataset dimostrativo incidenti  
 
 Al termine dell’esecuzione il database risulta pronto per l’interrogazione e per la produzione di output strutturati.
 
@@ -190,6 +191,7 @@ L’architettura prevede:
 - Direttiva (UE) 2022/2555 (NIS2) – Parlamento Europeo e Consiglio dell’Unione Europea  
 - Agenzia per la Cybersicurezza Nazionale (ACN): https://www.acn.gov.it  
 - Documentazione PostgreSQL: https://www.postgresql.org/docs/
+
 
 
 
