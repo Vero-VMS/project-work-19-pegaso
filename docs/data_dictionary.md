@@ -21,7 +21,7 @@ Consente di associare asset, servizi e contatti a un contesto aziendale e rende 
 - `name` (VARCHAR, NOT NULL, UNIQUE) – Denominazione dell’azienda.
 - `vat_number` (VARCHAR, NULL) – Partita IVA / codice fiscale.
 - `sector` (VARCHAR, NULL) – Settore di attività.
-- `country` (VARCHAR, NULL) – Paese dell’azienda.
+- `country` (VARCHAR(80), NULL, DEFAULT 'Italia') – Paese dell’azienda.
 - `created_at` (TIMESTAMPTZ, NOT NULL, DEFAULT now()) – Data di creazione del record.
 
 ---
@@ -44,7 +44,7 @@ Rappresenta un responsabile o punto di contatto interno (es. IT Manager, Securit
 - `contact_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco del contatto.
 - `company_id` (BIGINT, FK, NOT NULL) – Azienda di appartenenza.
 - `full_name` (VARCHAR, NOT NULL) – Nome e cognome del responsabile.
-- `role_title` (VARCHAR, NULL) – Ruolo o qualifica.
+- `role_title` (VARCHAR(150), NOT NULL) – Ruolo o qualifica.
 - `email` (VARCHAR, NULL) – Indirizzo email.
 - `phone` (VARCHAR, NULL) – Numero di telefono.
 - `is_primary_poc` (BOOLEAN, NOT NULL, DEFAULT false) – Indica se il contatto è punto di riferimento principale.
@@ -99,7 +99,7 @@ Rappresenta un bene informatico o tecnologico rilevante per l’organizzazione (
 - `company_id` (BIGINT, FK, NOT NULL) – Azienda proprietaria.
 - `asset_code` (VARCHAR(40), NOT NULL) – Codice interno dell’asset.
 - `name` (VARCHAR(200), NOT NULL) – Nome descrittivo dell’asset.
-- `asset_type` (VARCHAR(60), NOT NULL) – Tipologia (hardware, software, network, cloud).
+- `asset_type` (VARCHAR(60), NOT NULL) – Tipologia (HARDWARE, SOFTWARE, NETWORK, CLOUD, OTHER).
 - `description` (TEXT, NULL) – Descrizione dell’asset.
 - `location` (VARCHAR(200), NULL) – Collocazione fisica o logica.
 - `owner_contact_id` (BIGINT, FK, NULL) – Responsabile interno dell’asset.
@@ -387,7 +387,7 @@ maturity (livello di maturità del controllo)
 
 - `CHECK (maturity BETWEEN 1 AND 5)` – Valori ammessi per la maturità (se presente).
 
-Vincolo logico: se coverage = 0.0 allora maturity deve essere NULL (non applicabile).
+**Vincolo logico:** Se coverage = 0.0 allora maturity deve essere NULL; se coverage > 0.0 allora maturity è obbligatoria.
 
 **Campi**
 
@@ -444,7 +444,7 @@ Registra la valutazione (assessment) del livello di implementazione dei controll
 
 - `CHECK (maturity BETWEEN 1 AND 5)`
 
-Vincolo logico: se coverage = 0.0 allora maturity deve essere NULL.
+**Vincolo logico:** Se coverage = 0.0 allora maturity deve essere NULL; se coverage > 0.0 allora maturity è obbligatoria.
 
 **Campi**
 
@@ -482,21 +482,31 @@ Le tabelle `fw_subcategory` e `fw_control` rappresentano rispettivamente il rife
 ---
 ## Tabella: `incident`
 
-Scopo
+**Scopo**
 Registra gli eventi di sicurezza rilevati dall’organizzazione, in coerenza con gli obblighi previsti dalla Direttiva NIS2.
 Consente di tracciare informazioni descrittive, stato dell’incidente, livello di gravità e indicazione di “incidente significativo” ai fini degli obblighi di notifica.
 
-Chiave primaria
+**Chiave primaria**
 
 - `incident_id`
 
-Relazioni
+**Relazioni**
 
 Referenziata da: incident_asset, incident_notification
 
 FK verso: company
 
-Campi
+**Vincoli principali**
+
+- `UNIQUE (company_id, incident_code)` – Codice incidente univoco per azienda.
+
+- `CHECK (severity IN (...))` – Valori ammessi.
+
+- `CHECK (status IN (...))` – Stati ammessi.
+
+- `CHECK (closed_at IS NULL OR closed_at >= detected_at)` – Coerenza date chiusura.
+
+**Campi**
 
 - `incident_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco dell’incidente.
 
@@ -526,21 +536,21 @@ Campi
 
 ## Tabella: `incident_asset`
 
-Scopo
+**Scopo**
 Modella la relazione molti-a-molti tra incidenti e asset.
 Consente di indicare quali asset siano stati coinvolti o impattati da uno specifico evento di sicurezza.
 
-Chiave primaria
+**Chiave primaria**
 
 - `(incident_id, asset_id)`
 
-Relazioni
+**Relazioni**
 
 FK verso: incident
 
 FK verso: asset
 
-Campi
+**Campi**
 
 - `incident_id` (BIGINT, PK, FK, NOT NULL) – Identificativo dell’incidente.
 
@@ -550,22 +560,24 @@ Campi
 
 - `impact_notes` (TEXT, NULL) – Descrizione dell’impatto sull’asset.
 
+Un trigger valida la coerenza tra `incident.company_id` e `asset.company_id` per impedire collegamenti tra aziende diverse.
+
 ---
 
 ## Tabella: `incident_notification`
 
-Scopo
+**Scopo**
 Traccia le notifiche inviate all’autorità competente (es. ACN) in relazione a un incidente significativo, in conformità agli obblighi di notifica previsti dalla NIS2.
 
-Chiave primaria
+**Chiave primaria**
 
 - `notification_id`
 
-Relazioni
+**Relazioni**
 
 FK verso: incident
 
-Campi
+**Campi**
 
 - `notification_id` (BIGSERIAL, PK, NOT NULL) – Identificativo univoco della notifica.
 
@@ -584,3 +596,5 @@ Campi
 - `reference_code` (VARCHAR, NULL) – Codice o protocollo assegnato dall’autorità.
 
 - `content_summary` (TEXT, NULL) – Sintesi del contenuto trasmesso.
+
+
