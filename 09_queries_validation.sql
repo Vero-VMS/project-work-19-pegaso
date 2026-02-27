@@ -284,7 +284,7 @@ ORDER BY s.service_code, sp.dependency_type;
 SELECT ah.asset_code, ah.name, ah.criticality, ah.status,
        ah.valid_from, ah.valid_to, ah.changed_by, ah.change_reason
 FROM asset_history ah
-WHERE ah.asset_code = 'DB-001'
+WHERE ah.asset_code = 'SRV-001'
 ORDER BY ah.valid_from DESC;
 
 -- Q37: Controllo sovrapposizioni temporali nello storico
