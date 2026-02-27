@@ -148,11 +148,13 @@ WHERE s.service_code='SVC-EMAIL' AND p.name='NetFast';
 -- Eseguo un aggiornamento controllato su un asset per generare almeno una riga nello storico,
 -- così è possibile verificare concretamente il funzionamento del trigger di versioning.
 
+-- 1° update: cambia la criticità (da 4 a 3)
 UPDATE asset
-SET criticality = 4
+SET criticality = 3
 WHERE asset_code = 'SRV-001';
 
--- (opzionale) secondo update per mostrare più versioni
+-- 2° update: cambia lo stato (da ACTIVE a INACTIVE)
 UPDATE asset
 SET status = 'INACTIVE'
 WHERE asset_code = 'SRV-001';
+
